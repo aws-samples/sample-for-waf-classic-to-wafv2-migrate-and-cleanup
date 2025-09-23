@@ -54,14 +54,14 @@ WAF Classic is supported in the following 32 AWS regions, plus a special "cloudf
 
 2. **Make the script executable:**
    ```bash
-   chmod +x wafv1-cleanup.py
-   chmod +x wafv1-cleanup.sh
+   chmod +x waf-classic-cleanup.py
+   chmod +x waf-classic-cleanup.sh
    cd ../common && chmod +x aws_credentials_helper.py
    ```
 
 3. **Set up AWS credentials (if not already configured):**
    ```bash
-   ./wafv1-cleanup.sh --setup-credentials
+   ./waf-classic-cleanup.sh --setup-credentials
    ```
 
 ## Usage
@@ -70,42 +70,42 @@ WAF Classic is supported in the following 32 AWS regions, plus a special "cloudf
 
 ```bash
 # Interactive shell wrapper (recommended)
-./wafv1-cleanup.sh
+./waf-classic-cleanup.sh
 
 # Direct Python usage examples:
 
 # Analyze all WebACLs in a single region
-python3 wafv1-cleanup.py --all-webacls --regions us-east-1 --analyze
+python3 waf-classic-cleanup.py --all-webacls --regions us-east-1 --analyze
 
 # Analyze all resources across all regions
-python3 wafv1-cleanup.py --all-webacls --all-regions --analyze
+python3 waf-classic-cleanup.py --all-webacls --all-regions --analyze
 
 # Delete specific WebACLs
-python3 wafv1-cleanup.py --webacl-ids WEBACL_ID1,WEBACL_ID2 --regions us-east-1
+python3 waf-classic-cleanup.py --webacl-ids WEBACL_ID1,WEBACL_ID2 --regions us-east-1
 
 # Delete all WebACLs in multiple regions
-python3 wafv1-cleanup.py --all-webacls --regions us-east-1,us-west-2
+python3 waf-classic-cleanup.py --all-webacls --regions us-east-1,us-west-2
 
 # Export WebACLs to CSV
-python3 wafv1-cleanup.py export-webacl --all-webacls --regions us-east-1
+python3 waf-classic-cleanup.py export-webacl --all-webacls --regions us-east-1
 
 # Import and delete WebACLs from CSV
-python3 wafv1-cleanup.py --csv-file webacls.csv --resource-type webacls
+python3 waf-classic-cleanup.py --csv-file webacls.csv --resource-type webacls
 
 # Delete all resources (WebACLs, RuleGroups, Rules, Conditions)
-python3 wafv1-cleanup.py --delete-all --all-regions
+python3 waf-classic-cleanup.py --delete-all --all-regions
 
 # RuleGroups operations
-python3 wafv1-cleanup.py --all-rulegroups --regions us-east-1 --analyze
-python3 wafv1-cleanup.py export-rulegroup --all-rulegroups --regions us-east-1
+python3 waf-classic-cleanup.py --all-rulegroups --regions us-east-1 --analyze
+python3 waf-classic-cleanup.py export-rulegroup --all-rulegroups --regions us-east-1
 
 # Rules operations  
-python3 wafv1-cleanup.py --all-rules --regions us-east-1 --analyze
-python3 wafv1-cleanup.py export-rule --all-rules --regions us-east-1
+python3 waf-classic-cleanup.py --all-rules --regions us-east-1 --analyze
+python3 waf-classic-cleanup.py export-rule --all-rules --regions us-east-1
 
 # Conditions operations
-python3 wafv1-cleanup.py --all-conditions --regions us-east-1 --analyze
-python3 wafv1-cleanup.py export-condition --all-conditions --regions us-east-1
+python3 waf-classic-cleanup.py --all-conditions --regions us-east-1 --analyze
+python3 waf-classic-cleanup.py export-condition --all-conditions --regions us-east-1
 ```
 
 **Note:** When using `--all-regions`, the tool will attempt to access WAF services in all supported regions. Ensure your credentials have the necessary permissions across all target regions.
@@ -120,10 +120,10 @@ The tool includes an integrated credential management system to help you set up 
 
 ```bash
 # Interactive credential setup
-./wafv1-cleanup.sh --setup-credentials
+./waf-classic-cleanup.sh --setup-credentials
 
 # Check current credential status
-./wafv1-cleanup.sh --check-credentials
+./waf-classic-cleanup.sh --check-credentials
 
 # Run the credential helper directly
 python3 aws_credentials_helper.py
@@ -142,7 +142,7 @@ The integrated credential helper provides:
 
 ### Automatic Credential Checking
 
-The `./wafv1-cleanup.sh` wrapper automatically:
+The `./waf-classic-cleanup.sh` wrapper automatically:
 - Checks if credentials are configured before running
 - Offers to set up credentials if none are found
 - Validates credentials work with AWS
@@ -390,7 +390,7 @@ A sample CSV file (`sample_webacls.csv`) is included in the repository for refer
 
 ### Import Workflow:
 1. Prepare your CSV file with resource marked for deletion with the word 'DELETE'
-2. Run: `python3 wafv1-cleanup.py --csv-file your_file_path.csv --resource-type webacls`
+2. Run: `python3 waf-classic-cleanup.py --csv-file your_file_path.csv --resource-type webacls`
 3. The tool will skip discovery and directly process deletions
 4. Confirm the deletion when prompted
 5. --resource-type can be webacls, rulegroups, rules, conditions
@@ -441,7 +441,7 @@ A sample CSV file (`sample_webacls.csv`) is included in the repository for refer
 
 6. **"No credentials found"**
    - AWS credentials not configured
-   - Run `./wafv1-cleanup.sh --setup-credentials` for interactive setup
+   - Run `./waf-classic-cleanup.sh --setup-credentials` for interactive setup
    - Or run `aws configure` or set up AWS credentials manually
 
 7. **"Invalid regions specified"**
