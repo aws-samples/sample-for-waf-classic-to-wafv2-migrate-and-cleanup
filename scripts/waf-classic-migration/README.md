@@ -35,6 +35,8 @@ This comprehensive tool migrates AWS WAF Classic WebACLs to equivalent WAF v2 We
 
 ## Usage
 
+[Go to the CSV workflow section](#csv-exportimport-workflow)
+
 ### Interactive Mode (Recommended)
 ```bash
 ./waf-classic-migrate.sh
