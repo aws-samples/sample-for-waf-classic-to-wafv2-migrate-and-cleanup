@@ -37,7 +37,7 @@ This comprehensive tool migrates AWS WAF Classic WebACLs to equivalent WAF v2 We
 
 ### Interactive Mode (Recommended)
 ```bash
-./waf-migrate.sh
+./waf-classic-migrate.sh
 ```
 
 **Interactive Experience:**
@@ -58,62 +58,62 @@ This comprehensive tool migrates AWS WAF Classic WebACLs to equivalent WAF v2 We
 ```bash
 # WebACL Migration Commands
 # Analyze WebACLs (recommended first step)
-python3 waf-migrator.py migrate-webacl --all-webacls --regions us-east-1 --analyze
-python3 waf-migrator.py migrate-webacl --webacl-ids webacl-id1,webacl-id2 --regions us-east-1,us-west-2 --analyze
+python3 waf-classic-migrator.py migrate-webacl --all-webacls --regions us-east-1 --analyze
+python3 waf-classic-migrator.py migrate-webacl --webacl-ids webacl-id1,webacl-id2 --regions us-east-1,us-west-2 --analyze
 
 # Migrate WebACLs without logging
-python3 waf-migrator.py migrate-webacl --all-webacls --regions us-east-1
-python3 waf-migrator.py migrate-webacl --webacl-ids webacl-id1,webacl-id2 --regions us-east-1,us-west-2
+python3 waf-classic-migrator.py migrate-webacl --all-webacls --regions us-east-1
+python3 waf-classic-migrator.py migrate-webacl --webacl-ids webacl-id1,webacl-id2 --regions us-east-1,us-west-2
 
 # Migrate WebACLs with logging configuration
-python3 waf-migrator.py migrate-webacl --all-webacls --regions us-east-1 --migrate-logging
-python3 waf-migrator.py migrate-webacl --webacl-ids webacl-id1,webacl-id2 --regions us-east-1,us-west-2 --migrate-logging
+python3 waf-classic-migrator.py migrate-webacl --all-webacls --regions us-east-1 --migrate-logging
+python3 waf-classic-migrator.py migrate-webacl --webacl-ids webacl-id1,webacl-id2 --regions us-east-1,us-west-2 --migrate-logging
 
 # Migrate from all regions
-python3 waf-migrator.py migrate-webacl --all-webacls --all-regions --analyze
-python3 waf-migrator.py migrate-webacl --all-webacls --all-regions --migrate-logging
+python3 waf-classic-migrator.py migrate-webacl --all-webacls --all-regions --analyze
+python3 waf-classic-migrator.py migrate-webacl --all-webacls --all-regions --migrate-logging
 
 # RuleGroup Migration Commands
 # Analyze RuleGroups
-python3 waf-migrator.py migrate-rulegroup --all-rulegroups --regions us-east-1 --analyze
-python3 waf-migrator.py migrate-rulegroup --rulegroup-ids rulegroup-id1,rulegroup-id2 --regions us-east-1,us-west-2 --analyze
+python3 waf-classic-migrator.py migrate-rulegroup --all-rulegroups --regions us-east-1 --analyze
+python3 waf-classic-migrator.py migrate-rulegroup --rulegroup-ids rulegroup-id1,rulegroup-id2 --regions us-east-1,us-west-2 --analyze
 
 # Migrate RuleGroups
-python3 waf-migrator.py migrate-rulegroup --all-rulegroups --regions us-east-1
-python3 waf-migrator.py migrate-rulegroup --rulegroup-ids rulegroup-id1,rulegroup-id2 --regions us-east-1,us-west-2
+python3 waf-classic-migrator.py migrate-rulegroup --all-rulegroups --regions us-east-1
+python3 waf-classic-migrator.py migrate-rulegroup --rulegroup-ids rulegroup-id1,rulegroup-id2 --regions us-east-1,us-west-2
 
 # Migrate from all regions
-python3 waf-migrator.py migrate-rulegroup --all-rulegroups --all-regions
+python3 waf-classic-migrator.py migrate-rulegroup --all-rulegroups --all-regions
 
 # CSV Export Commands
 # Export WebACLs to CSV for planning
-python3 waf-migrator.py export-webacl --all-webacls --regions us-east-1,us-west-2
-python3 waf-migrator.py export-webacl --all-webacls --all-regions
+python3 waf-classic-migrator.py export-webacl --all-webacls --regions us-east-1,us-west-2
+python3 waf-classic-migrator.py export-webacl --all-webacls --all-regions
 
 # Export RuleGroups to CSV for planning
-python3 waf-migrator.py export-rulegroup --all-rulegroups --regions us-east-1,us-west-2
-python3 waf-migrator.py export-rulegroup --all-rulegroups --all-regions
+python3 waf-classic-migrator.py export-rulegroup --all-rulegroups --regions us-east-1,us-west-2
+python3 waf-classic-migrator.py export-rulegroup --all-rulegroups --all-regions
 
 # CSV Import Commands
 # Analyze resources from CSV file (safe preview)
-python3 waf-migrator.py migrate-webacl --csv-file webacls.csv --analyze
-python3 waf-migrator.py migrate-rulegroup --csv-file rulegroups.csv --analyze
+python3 waf-classic-migrator.py migrate-webacl --csv-file webacls.csv --analyze
+python3 waf-classic-migrator.py migrate-rulegroup --csv-file rulegroups.csv --analyze
 
 # Migrate resources marked in CSV file
-python3 waf-migrator.py migrate-webacl --csv-file webacls.csv
-python3 waf-migrator.py migrate-webacl --csv-file webacls.csv --migrate-logging
-python3 waf-migrator.py migrate-rulegroup --csv-file rulegroups.csv
+python3 waf-classic-migrator.py migrate-webacl --csv-file webacls.csv
+python3 waf-classic-migrator.py migrate-webacl --csv-file webacls.csv --migrate-logging
+python3 waf-classic-migrator.py migrate-rulegroup --csv-file rulegroups.csv
 
 # Interactive Shell Script Usage
 # Make the script executable and run
-chmod +x waf-migrate.sh
-./waf-migrate.sh
+chmod +x waf-classic-migrate.sh
+./waf-classic-migrate.sh
 
 # Check AWS credentials
-./waf-migrate.sh --check-credentials
+./waf-classic-migrate.sh --check-credentials
 
 # Setup AWS credentials interactively
-./waf-migrate.sh --setup-credentials
+./waf-classic-migrate.sh --setup-credentials
 ```
 
 ### Benefits
@@ -127,7 +127,7 @@ chmod +x waf-migrate.sh
 
 ### Single Command Migration
 ```bash
-python3 waf-migrator.py migrate-webacl --webacl-ids <WEBACL_ID> --regions <REGION>
+python3 waf-classic-migrator.py migrate-webacl --webacl-ids <WEBACL_ID> --regions <REGION>
 ```
 
 **Complete Process:**
@@ -233,7 +233,7 @@ The tool supports migrating WAF Classic logging configurations (only FireHose) t
 
 ```bash
 # Migrate WebACL with logging configuration
-python3 waf-migrator.py migrate-webacl --webacl-ids <WEBACL_ID> --regions us-east-1 --migrate-logging
+python3 waf-classic-migrator.py migrate-webacl --webacl-ids <WEBACL_ID> --regions us-east-1 --migrate-logging
 ```
 
 **Logging Migration Features:**
