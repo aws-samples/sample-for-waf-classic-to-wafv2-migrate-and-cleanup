@@ -12,7 +12,7 @@ Comprehensive unit tests for the WAF Classic to WAF v2 migration tool, covering:
 - Helper functions (AWS credentials, data conversion)
 - Integration scenarios (complex WebACLs, existing resources)
 
-### test_wafv1_cleanup.py
+### test_waf_classic_cleanup.py
 Comprehensive unit tests for the WAF Classic cleanup tool, covering:
 - WebACL cleanup functionality
 - RuleGroup cleanup functionality
@@ -35,7 +35,7 @@ python3 run_tests.py
 python3 run_tests.py test_waf_migrator
 
 # Run only cleanup tests
-python3 run_tests.py test_wafv1_cleanup
+python3 run_tests.py test_waf_classic_cleanup
 ```
 
 ### Run with Python unittest directly
