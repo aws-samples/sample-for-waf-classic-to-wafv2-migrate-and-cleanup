@@ -16,14 +16,14 @@ from waf_region_config import WAFRegionManager
 
 def get_waf_functions():
     """Import functions from waf-migrator.py"""
-    waf_migration_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'waf-migration')
+    waf_migration_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'waf-classic-migration')
     original_cwd = os.getcwd()
     os.chdir(waf_migration_dir)
     sys.path.insert(0, waf_migration_dir)
     
     try:
         import importlib.util
-        spec = importlib.util.spec_from_file_location("waf_migrator", "waf-migrator.py")
+        spec = importlib.util.spec_from_file_location("waf_migrator", "waf-classic-migrator.py")
         waf_migrator = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(waf_migrator)
         return waf_migrator
