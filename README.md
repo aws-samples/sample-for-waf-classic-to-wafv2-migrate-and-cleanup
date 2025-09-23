@@ -15,7 +15,7 @@ pip install -r requirements.txt
 
 # Make scripts executable
 chmod +x scripts/waf-migration/waf-migrate.sh
-chmod +x scripts/waf-cleanup/wafv1-cleanup.sh
+chmod +x scripts/waf-cleanup/waf-classic-cleanup.sh
 ```
 
 ### AWS Credentials Setup
@@ -25,7 +25,7 @@ Both tools include interactive credential management:
 ./scripts/waf-migration/waf-migrate.sh --setup-credentials
 
 # Setup through cleanup tool
-./scripts/waf-cleanup/wafv1-cleanup.sh --setup-credentials
+./scripts/waf-cleanup/waf-classic-cleanup.sh --setup-credentials
 
 # Or use the shared helper directly
 python3 scripts/common/aws_credentials_helper.py
@@ -35,6 +35,7 @@ python3 scripts/common/aws_credentials_helper.py
 
 ### WAF Migration Tool
 **Location**: `scripts/waf-migration/`
+**Script**: `./scripts/waf-migration/waf-migrate.sh`
 
 Migrates AWS WAF Classic WebACLs to equivalent WAF v2 WebACLs with complete automation.
 
@@ -48,6 +49,7 @@ Migrates AWS WAF Classic WebACLs to equivalent WAF v2 WebACLs with complete auto
 
 ### WAF Cleanup Tool
 **Location**: `scripts/waf-cleanup/`
+**Script**: `./scripts/waf-cleanup/waf-classic-cleanup.sh`
 
 Safely removes AWS WAF Classic resources with dependency checking and confirmation prompts.
 
@@ -108,7 +110,7 @@ Comprehensive guide for AWS credential configuration including:
 ### Common Issues
 
 **"No credentials found"**
-- Run `./waf-migrate.sh --setup-credentials` or `./wafv1-cleanup.sh --setup-credentials`
+- Run `./waf-migrate.sh --setup-credentials` or `./waf-classic-cleanup.sh --setup-credentials`
 
 **"Access Denied"**
 - Verify IAM permissions match the requirements above
