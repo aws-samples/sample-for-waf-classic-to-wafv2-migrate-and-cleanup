@@ -4,13 +4,13 @@ This repository contains tools for managing AWS WAF Classic (v1) resources, incl
 
 ## Components
 
-### WAF Migration Tool (`scripts/waf-migration/`)
+### WAF Migration Tool (`scripts/waf-classic-migration/`)
 Tools for migrating AWS WAF Classic resources to WAF v2.
 
 - **waf-classic-migrator.py** - Core migration engine
 - **waf-classic-migrate.sh** - Interactive shell interface
 
-### WAF Cleanup Tool (`scripts/waf-cleanup/`)
+### WAF Cleanup Tool (`scripts/waf-classic-cleanup/`)
 Tools for cleaning up AWS WAF Classic resources.
 
 - **waf-classic-cleanup.py** - Core cleanup engine
@@ -62,7 +62,7 @@ The tools require the following AWS permissions:
 
 ## Support
 
-This is sample code provided for migrating and cleanup WAFv1 Classic. For production use, please review and test thoroughly in your environment.
+This is sample code provided for migrating and cleanup WAF Classic. For production use, please review and test thoroughly in your environment.
 
 ---
 
