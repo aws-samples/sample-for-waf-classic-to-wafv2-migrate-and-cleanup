@@ -425,9 +425,9 @@ Interactive AWS credentials setup utility:
 ## Usage in Tools
 
 These utilities are imported and used by:
-- **waf-migrator.py** - For migration operations
+- **waf-classic-migrator.py** - For migration operations
 - **waf-classic-cleanup.py** - For cleanup operations
-- **waf-migrate.sh** - For interactive resource listing
+- **waf-classic-migrate.sh** - For interactive resource listing
 - **waf-classic-cleanup.sh** - For interactive resource listing
 
 ## Design Principles
