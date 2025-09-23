@@ -25,7 +25,7 @@ def run_all_tests():
     # Add test modules
     test_modules = [
         'test_waf_migrator',
-        'test_wafv1_cleanup'
+        'test_waf_classic_cleanup'
     ]
     
     for module in test_modules:
