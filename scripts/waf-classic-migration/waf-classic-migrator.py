@@ -4861,7 +4861,7 @@ def main():
         print("ERROR: AWS credentials not found or not working!")
         print()
         print("Options:")
-        print("1. Run: ./waf-migrate.sh --setup-credentials")
+        print("1. Run: ./waf-classic-migrate.sh --setup-credentials")
         print("2. Run: aws configure")
         print("3. Set environment variables:")
         print("   export AWS_ACCESS_KEY_ID='your-access-key'")
