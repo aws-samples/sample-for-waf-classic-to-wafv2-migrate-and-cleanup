@@ -35,6 +35,7 @@ python3 scripts/common/aws_credentials_helper.py
 
 ### WAF Migration Tool
 **Location**: `scripts/waf-classic-migration/`
+
 **Script**: `./scripts/waf-classic-migration/waf-classic-migrate.sh`
 
 Migrates AWS WAF Classic WebACLs to equivalent WAF v2 WebACLs with complete automation.
@@ -49,6 +50,7 @@ Migrates AWS WAF Classic WebACLs to equivalent WAF v2 WebACLs with complete auto
 
 ### WAF Cleanup Tool
 **Location**: `scripts/waf-classic-cleanup/`
+
 **Script**: `./scripts/waf-classic-cleanup/waf-classic-cleanup.sh`
 
 Safely removes AWS WAF Classic resources with dependency checking and confirmation prompts.
