@@ -207,7 +207,7 @@ AWS credentials configured with permissions:
 - **Empty Resources**: Graceful handling (e.g., empty IPSets)
 - **Resource Propagation**: Automatic retry with exponential backoff
 
-## CSV Export Format
+## CSV Export/Import Workflow
 
 ### WebACL Export
 ```csv
