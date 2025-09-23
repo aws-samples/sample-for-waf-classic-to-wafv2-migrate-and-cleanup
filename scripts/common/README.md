@@ -15,7 +15,7 @@ cd scripts/waf-migration
 
 # Setup credentials through cleanup tool  
 cd scripts/waf-cleanup
-./wafv1-cleanup.sh --setup-credentials
+./waf-classic-cleanup.sh --setup-credentials
 
 # Direct credential helper (from project root)
 python3 scripts/common/aws_credentials_helper.py
@@ -30,7 +30,7 @@ Both tools will automatically prompt you to set up credentials if none are found
 ./waf-migrate.sh
 
 # From waf-cleanup directory  
-./wafv1-cleanup.sh
+./waf-classic-cleanup.sh
 
 # If no credentials found, you'll be prompted to set them up
 ```
@@ -41,7 +41,7 @@ Both tools will automatically prompt you to set up credentials if none are found
 ./waf-migrate.sh --check-credentials
 
 # Check credentials through cleanup tool
-./wafv1-cleanup.sh --check-credentials
+./waf-classic-cleanup.sh --check-credentials
 ```
 
 ### 3. Manual AWS CLI Setup
@@ -61,7 +61,7 @@ For EC2 instances or Lambda functions, attach appropriate IAM roles.
 
 ## Required Permissions
 
-### Classic WAF (WAFv1) Permissions
+### Classic WAF (waf-classic) Permissions
 Required for both migration and cleanup tools. Includes both global (`waf`) and regional (`waf-regional`) services:
 
 ```json
@@ -335,8 +335,8 @@ python3 scripts/common/aws_credentials_helper.py
 # Through shell wrappers
 ./waf-migrate.sh --setup-credentials    # Setup new credentials
 ./waf-migrate.sh --check-credentials    # Test existing credentials
-./wafv1-cleanup.sh --setup-credentials  # Setup new credentials  
-./wafv1-cleanup.sh --check-credentials  # Test existing credentials
+./waf-classic-cleanup.sh --setup-credentials  # Setup new credentials  
+./waf-classic-cleanup.sh --check-credentials  # Test existing credentials
 ```
 
 ## Troubleshooting
@@ -346,7 +346,7 @@ python3 scripts/common/aws_credentials_helper.py
 **"No credentials found"**
 - Run credential setup through either tool:
   - `./waf-migrate.sh --setup-credentials`
-  - `./wafv1-cleanup.sh --setup-credentials`
+  - `./waf-classic-cleanup.sh --setup-credentials`
 - Or use `aws configure`
 - Or set environment variables
 
@@ -364,7 +364,7 @@ python3 scripts/common/aws_credentials_helper.py
 ```bash
 # Test through the tools
 ./waf-migrate.sh --check-credentials
-./wafv1-cleanup.sh --check-credentials
+./waf-classic-cleanup.sh --check-credentials
 
 # Test manually with AWS CLI
 aws sts get-caller-identity
@@ -426,9 +426,9 @@ Interactive AWS credentials setup utility:
 
 These utilities are imported and used by:
 - **waf-migrator.py** - For migration operations
-- **wafv1-cleanup.py** - For cleanup operations
+- **waf-classic-cleanup.py** - For cleanup operations
 - **waf-migrate.sh** - For interactive resource listing
-- **wafv1-cleanup.sh** - For interactive resource listing
+- **waf-classic-cleanup.sh** - For interactive resource listing
 
 ## Design Principles
 
