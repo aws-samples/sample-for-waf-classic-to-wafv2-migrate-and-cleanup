@@ -11,7 +11,7 @@ The WAF tools include built-in credential management to help you set up and mana
 ```bash
 # Setup credentials through migration tool
 cd scripts/waf-migration
-./waf-migrate.sh --setup-credentials
+./waf-classic-migrate.sh --setup-credentials
 
 # Setup credentials through cleanup tool  
 cd scripts/waf-cleanup
@@ -27,7 +27,7 @@ python3 scripts/common/aws_credentials_helper.py
 Both tools will automatically prompt you to set up credentials if none are found:
 ```bash
 # From waf-migration directory
-./waf-migrate.sh
+./waf-classic-migrate.sh
 
 # From waf-cleanup directory  
 ./waf-classic-cleanup.sh
@@ -38,7 +38,7 @@ Both tools will automatically prompt you to set up credentials if none are found
 ### 2. Check Existing Credentials
 ```bash
 # Check credentials through migration tool
-./waf-migrate.sh --check-credentials
+./waf-classic-migrate.sh --check-credentials
 
 # Check credentials through cleanup tool
 ./waf-classic-cleanup.sh --check-credentials
@@ -333,8 +333,8 @@ The `aws_credentials_helper.py` provides:
 python3 scripts/common/aws_credentials_helper.py
 
 # Through shell wrappers
-./waf-migrate.sh --setup-credentials    # Setup new credentials
-./waf-migrate.sh --check-credentials    # Test existing credentials
+./waf-classic-migrate.sh --setup-credentials    # Setup new credentials
+./waf-classic-migrate.sh --check-credentials    # Test existing credentials
 ./waf-classic-cleanup.sh --setup-credentials  # Setup new credentials  
 ./waf-classic-cleanup.sh --check-credentials  # Test existing credentials
 ```
@@ -345,7 +345,7 @@ python3 scripts/common/aws_credentials_helper.py
 
 **"No credentials found"**
 - Run credential setup through either tool:
-  - `./waf-migrate.sh --setup-credentials`
+  - `./waf-classic-migrate.sh --setup-credentials`
   - `./waf-classic-cleanup.sh --setup-credentials`
 - Or use `aws configure`
 - Or set environment variables
@@ -363,7 +363,7 @@ python3 scripts/common/aws_credentials_helper.py
 ### Testing Credentials
 ```bash
 # Test through the tools
-./waf-migrate.sh --check-credentials
+./waf-classic-migrate.sh --check-credentials
 ./waf-classic-cleanup.sh --check-credentials
 
 # Test manually with AWS CLI
@@ -443,6 +443,3 @@ These utilities are imported and used by:
 Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 SPDX-License-Identifier: MIT-0
 
----
-
-**Last Updated**: September 17, 2025
