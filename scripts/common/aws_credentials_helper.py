@@ -212,17 +212,26 @@ def test_credentials():
         print(f"   User ARN: {response.get('Arn', 'Unknown')}")
         return True
 
-    except NoCredentialsError:
-        print("ERROR: No credentials found!")
-        return False
-    except ClientError as e:
-        print(f"ERROR: Credential error: {e}")
-        return False
     except ImportError:
         print("ERROR: boto3 not installed. Run: pip3 install boto3")
         return False
     except Exception as e:
-        print(f"ERROR: Unexpected error: {e}")
+        try:
+            from botocore.exceptions import NoCredentialsError
+            if isinstance(e, NoCredentialsError):
+                print("ERROR: No credentials found!")
+                return False
+        except ImportError:
+            pass
+        
+        # Handle other boto3 errors
+        error_str = str(e).lower()
+        if 'credentials' in error_str or 'unable to locate credentials' in error_str:
+            print("ERROR: No credentials found!")
+        elif 'access denied' in error_str or 'forbidden' in error_str:
+            print("ERROR: Access denied - check your credentials and permissions")
+        else:
+            print(f"ERROR: Unexpected error: {e}")
         return False
 
 def main():
