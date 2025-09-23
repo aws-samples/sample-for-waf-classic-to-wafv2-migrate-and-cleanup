@@ -337,7 +337,7 @@ webacl_action_menu() {
             a|A)
                 echo
                 echo "=== Analyzing WebACLs ==="
-                python3 waf-migrator.py migrate-webacl $WEBACL_SELECTION $SELECTED_REGIONS_CMD --analyze
+                python3 waf-classic-migrator.py migrate-webacl $WEBACL_SELECTION $SELECTED_REGIONS_CMD --analyze
                 echo
                 echo "Analysis complete. Press Enter to continue..."
                 read
@@ -354,9 +354,9 @@ webacl_action_menu() {
                 echo
                 echo "=== Migrating WebACLs ==="
                 if [[ "$logging_choice" =~ ^[Yy]$ ]]; then
-                    python3 waf-migrator.py migrate-webacl $WEBACL_SELECTION $SELECTED_REGIONS_CMD --migrate-logging
+                    python3 waf-classic-migrator.py migrate-webacl $WEBACL_SELECTION $SELECTED_REGIONS_CMD --migrate-logging
                 else
-                    python3 waf-migrator.py migrate-webacl $WEBACL_SELECTION $SELECTED_REGIONS_CMD
+                    python3 waf-classic-migrator.py migrate-webacl $WEBACL_SELECTION $SELECTED_REGIONS_CMD
                 fi
                 echo
                 echo "Migration complete. Press Enter to continue..."
@@ -500,7 +500,7 @@ rulegroup_action_menu() {
             a|A)
                 echo
                 echo "=== Analyzing RuleGroups ==="
-                python3 waf-migrator.py migrate-rulegroup $RULEGROUP_SELECTION $SELECTED_REGIONS_CMD --analyze
+                python3 waf-classic-migrator.py migrate-rulegroup $RULEGROUP_SELECTION $SELECTED_REGIONS_CMD --analyze
                 echo
                 echo "Analysis complete. Press Enter to continue..."
                 read
@@ -508,7 +508,7 @@ rulegroup_action_menu() {
             m|M)
                 echo
                 echo "=== Migrating RuleGroups ==="
-                python3 waf-migrator.py migrate-rulegroup $RULEGROUP_SELECTION $SELECTED_REGIONS_CMD
+                python3 waf-classic-migrator.py migrate-rulegroup $RULEGROUP_SELECTION $SELECTED_REGIONS_CMD
                 echo
                 echo "Migration complete. Press Enter to continue..."
                 read
@@ -546,12 +546,12 @@ select_regions_for_webacl_export() {
     if [ -n "$SELECTED_REGIONS" ]; then
         if [ "$SELECTED_REGIONS" = "all-regions" ]; then
             echo "Exporting all WebACLs from all regions..."
-            python3 waf-migrator.py export-webacl $base_args --all-regions
+            python3 waf-classic-migrator.py export-webacl $base_args --all-regions
         else
             # Convert space-separated to comma-separated
             REGION_LIST=$(echo $SELECTED_REGIONS | tr ' ' ',')
             echo "Exporting all WebACLs from regions: $REGION_LIST"
-            python3 waf-migrator.py export-webacl $base_args --regions "$REGION_LIST"
+            python3 waf-classic-migrator.py export-webacl $base_args --regions "$REGION_LIST"
         fi
         echo
         echo "Export complete. CSV file includes 'mark_for_migration' column set to 'MIGRATE'."
@@ -568,12 +568,12 @@ select_regions_for_rulegroup_export() {
     if [ -n "$SELECTED_REGIONS" ]; then
         if [ "$SELECTED_REGIONS" = "all-regions" ]; then
             echo "Exporting all RuleGroups from all regions..."
-            python3 waf-migrator.py export-rulegroup $base_args --all-regions
+            python3 waf-classic-migrator.py export-rulegroup $base_args --all-regions
         else
             # Convert space-separated to comma-separated
             REGION_LIST=$(echo $SELECTED_REGIONS | tr ' ' ',')
             echo "Exporting all RuleGroups from regions: $REGION_LIST"
-            python3 waf-migrator.py export-rulegroup $base_args --regions "$REGION_LIST"
+            python3 waf-classic-migrator.py export-rulegroup $base_args --regions "$REGION_LIST"
         fi
         echo
         echo "Export complete. CSV file includes 'mark_for_migration' column set to 'MIGRATE'."
@@ -612,15 +612,15 @@ import_webacl_csv() {
     case $choice in
         1)
             echo "Analyzing WebACLs from CSV..."
-            python3 waf-migrator.py migrate-webacl --csv-file "$csv_file" --analyze
+            python3 waf-classic-migrator.py migrate-webacl --csv-file "$csv_file" --analyze
             ;;
         2)
             echo "Migrating marked WebACLs..."
             read -p "Include logging configuration? (y/n): " logging
             if [ "$logging" = "y" ] || [ "$logging" = "Y" ]; then
-                python3 waf-migrator.py migrate-webacl --csv-file "$csv_file" --migrate-logging
+                python3 waf-classic-migrator.py migrate-webacl --csv-file "$csv_file" --migrate-logging
             else
-                python3 waf-migrator.py migrate-webacl --csv-file "$csv_file"
+                python3 waf-classic-migrator.py migrate-webacl --csv-file "$csv_file"
             fi
             ;;
         b|B) return ;;
@@ -662,11 +662,11 @@ import_rulegroup_csv() {
     case $choice in
         1)
             echo "Analyzing RuleGroups from CSV..."
-            python3 waf-migrator.py migrate-rulegroup --csv-file "$csv_file" --analyze
+            python3 waf-classic-migrator.py migrate-rulegroup --csv-file "$csv_file" --analyze
             ;;
         2)
             echo "Migrating marked RuleGroups..."
-            python3 waf-migrator.py migrate-rulegroup --csv-file "$csv_file"
+            python3 waf-classic-migrator.py migrate-rulegroup --csv-file "$csv_file"
             ;;
         b|B) return ;;
         q|Q) echo "Goodbye!"; exit 0 ;;
