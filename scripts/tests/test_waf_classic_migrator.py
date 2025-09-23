@@ -18,12 +18,12 @@ import csv
 from datetime import datetime
 
 # Add the script directory to the path
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'waf-migration'))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'waf-classic-migration'))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
 
 # Import the modules to test - handle hyphenated filename
 import importlib.util
-waf_migrator_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'waf-migration', 'waf-migrator.py')
+waf_migrator_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'waf-classic-migration', 'waf-classic-migrator.py')
 spec = importlib.util.spec_from_file_location("waf_migrator", waf_migrator_path)
 waf_migrator = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(waf_migrator)
