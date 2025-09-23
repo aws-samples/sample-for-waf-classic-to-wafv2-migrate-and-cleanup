@@ -4,7 +4,7 @@ This directory contains comprehensive unit tests for the WAF migration and clean
 
 ## Test Coverage
 
-### test_waf_migrator.py
+### test_waf_classic_migrator.py
 Comprehensive unit tests for the WAF Classic to WAF v2 migration tool, covering:
 - DependencyGraph class (resource dependency tracking)
 - PlaceholderManager class (ARN placeholder management)
@@ -32,7 +32,7 @@ python3 run_tests.py
 ### Run Specific Test Module
 ```bash
 # Run only migration tests
-python3 run_tests.py test_waf_migrator
+python3 run_tests.py test_waf_classic_migrator
 
 # Run only cleanup tests
 python3 run_tests.py test_waf_classic_cleanup
@@ -41,13 +41,13 @@ python3 run_tests.py test_waf_classic_cleanup
 ### Run with Python unittest directly
 ```bash
 # Run all tests in a module
-python3 -m unittest test_waf_migrator
+python3 -m unittest test_waf_classic_migrator
 
 # Run a specific test class
-python3 -m unittest test_waf_migrator.TestDependencyGraph
+python3 -m unittest test_waf_classic_migrator.TestDependencyGraph
 
 # Run a specific test method
-python3 -m unittest test_waf_migrator.TestDependencyGraph.test_add_ipset
+python3 -m unittest test_waf_classic_migrator.TestDependencyGraph.test_add_ipset
 ```
 
 ## Test Structure
@@ -85,7 +85,7 @@ All tests use Python's `unittest` framework with extensive mocking to avoid actu
 
 1. **Verbose Output**: Use `-v` flag for detailed test output
    ```bash
-   python3 -m unittest -v test_waf_migrator
+   python3 -m unittest -v test_waf_classic_migrator
    ```
 
 2. **Discover Tests**: Auto-discover all tests
