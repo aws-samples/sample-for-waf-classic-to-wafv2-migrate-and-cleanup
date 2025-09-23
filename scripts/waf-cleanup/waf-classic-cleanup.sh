@@ -313,7 +313,7 @@ manual_webacl_action() {
             1)
                 echo
                 echo "=== Analyzing WebACLs ==="
-                python3 wafv1-cleanup.py $webacl_cmd $region_cmd --analyze
+                python3 waf-classic-cleanup.py $webacl_cmd $region_cmd --analyze
                 echo
                 echo "Press Enter to continue..."
                 read
@@ -323,7 +323,7 @@ manual_webacl_action() {
                 echo "WARNING: This will DELETE the selected WebACLs!"
                 echo
                 echo "=== Deleting WebACLs ==="
-                python3 wafv1-cleanup.py $webacl_cmd $region_cmd
+                python3 waf-classic-cleanup.py $webacl_cmd $region_cmd
                 echo
                 echo "Press Enter to continue..."
                 read
@@ -436,7 +436,7 @@ manual_rulegroup_action() {
             1)
                 echo
                 echo "=== Analyzing RuleGroups ==="
-                python3 wafv1-cleanup.py $rulegroup_cmd $region_cmd --analyze
+                python3 waf-classic-cleanup.py $rulegroup_cmd $region_cmd --analyze
                 echo
                 echo "Press Enter to continue..."
                 read
@@ -446,7 +446,7 @@ manual_rulegroup_action() {
                 echo "WARNING: This will DELETE the selected RuleGroups!"
                 echo
                 echo "=== Deleting RuleGroups ==="
-                python3 wafv1-cleanup.py $rulegroup_cmd $region_cmd
+                python3 waf-classic-cleanup.py $rulegroup_cmd $region_cmd
                 echo
                 echo "Press Enter to continue..."
                 read
@@ -559,7 +559,7 @@ manual_rule_action() {
             1)
                 echo
                 echo "=== Analyzing Rules ==="
-                python3 wafv1-cleanup.py $rule_cmd $region_cmd --analyze
+                python3 waf-classic-cleanup.py $rule_cmd $region_cmd --analyze
                 echo
                 echo "Press Enter to continue..."
                 read
@@ -569,7 +569,7 @@ manual_rule_action() {
                 echo "WARNING: This will DELETE the selected Rules!"
                 echo
                 echo "=== Deleting Rules ==="
-                python3 wafv1-cleanup.py $rule_cmd $region_cmd
+                python3 waf-classic-cleanup.py $rule_cmd $region_cmd
                 echo
                 echo "Press Enter to continue..."
                 read
@@ -682,7 +682,7 @@ manual_condition_action() {
             1)
                 echo
                 echo "=== Analyzing Conditions ==="
-                python3 wafv1-cleanup.py $condition_cmd $region_cmd --analyze
+                python3 waf-classic-cleanup.py $condition_cmd $region_cmd --analyze
                 echo
                 echo "Press Enter to continue..."
                 read
@@ -692,7 +692,7 @@ manual_condition_action() {
                 echo "WARNING: This will DELETE the selected Conditions!"
                 echo
                 echo "=== Deleting Conditions ==="
-                python3 wafv1-cleanup.py $condition_cmd $region_cmd
+                python3 waf-classic-cleanup.py $condition_cmd $region_cmd
                 echo
                 echo "Press Enter to continue..."
                 read
@@ -725,7 +725,7 @@ export_webacl_csv() {
     echo "Regions: $REGION_DISPLAY"
     echo
     echo "Exporting all WebACLs..."
-    python3 wafv1-cleanup.py export-webacl --all-webacls $REGION_CMD
+    python3 waf-classic-cleanup.py export-webacl --all-webacls $REGION_CMD
     echo
     echo "Export complete. CSV file includes 'mark_for_deletion' column set to 'DELETE'."
     echo "Press Enter to continue..."
@@ -754,7 +754,7 @@ export_rulegroup_csv() {
     echo "Regions: $REGION_DISPLAY"
     echo
     echo "Exporting all RuleGroups..."
-    python3 wafv1-cleanup.py export-rulegroup --all-rulegroups $REGION_CMD
+    python3 waf-classic-cleanup.py export-rulegroup --all-rulegroups $REGION_CMD
     echo
     echo "Export complete. CSV file includes 'mark_for_deletion' column set to 'DELETE'."
     echo "Press Enter to continue..."
@@ -783,7 +783,7 @@ export_rule_csv() {
     echo "Regions: $REGION_DISPLAY"
     echo
     echo "Exporting all Rules..."
-    python3 wafv1-cleanup.py export-rule --all-rules $REGION_CMD
+    python3 waf-classic-cleanup.py export-rule --all-rules $REGION_CMD
     echo
     echo "Export complete. CSV file includes 'mark_for_deletion' column set to 'DELETE'."
     echo "Press Enter to continue..."
@@ -812,7 +812,7 @@ export_condition_csv() {
     echo "Regions: $REGION_DISPLAY"
     echo
     echo "Exporting all Conditions..."
-    python3 wafv1-cleanup.py export-condition --all-conditions $REGION_CMD
+    python3 waf-classic-cleanup.py export-condition --all-conditions $REGION_CMD
     echo
     echo "Export complete. CSV file includes 'mark_for_deletion' column set to 'DELETE'."
     echo "Press Enter to continue..."
@@ -851,7 +851,7 @@ import_webacl_csv() {
         1)
             echo
             echo "=== Analyzing WebACLs from CSV ==="
-            python3 wafv1-cleanup.py --csv-file "$csv_file" --resource-type webacls --analyze
+            python3 waf-classic-cleanup.py --csv-file "$csv_file" --resource-type webacls --analyze
             echo
             echo "Press Enter to continue..."
             read
@@ -861,7 +861,7 @@ import_webacl_csv() {
             echo "WARNING: This will DELETE the marked WebACLs!"
             echo
             echo "=== Deleting WebACLs from CSV ==="
-            python3 wafv1-cleanup.py --csv-file "$csv_file" --resource-type webacls
+            python3 waf-classic-cleanup.py --csv-file "$csv_file" --resource-type webacls
             echo
             echo "Press Enter to continue..."
             read
@@ -903,7 +903,7 @@ import_rulegroup_csv() {
         1)
             echo
             echo "=== Analyzing RuleGroups from CSV ==="
-            python3 wafv1-cleanup.py --csv-file "$csv_file" --resource-type rulegroups --analyze
+            python3 waf-classic-cleanup.py --csv-file "$csv_file" --resource-type rulegroups --analyze
             echo
             echo "Press Enter to continue..."
             read
@@ -913,7 +913,7 @@ import_rulegroup_csv() {
             echo "WARNING: This will DELETE the marked RuleGroups!"
             echo
             echo "=== Deleting RuleGroups from CSV ==="
-            python3 wafv1-cleanup.py --csv-file "$csv_file" --resource-type rulegroups
+            python3 waf-classic-cleanup.py --csv-file "$csv_file" --resource-type rulegroups
             echo
             echo "Press Enter to continue..."
             read
@@ -955,7 +955,7 @@ import_rule_csv() {
         1)
             echo
             echo "=== Analyzing Rules from CSV ==="
-            python3 wafv1-cleanup.py --csv-file "$csv_file" --resource-type rules --analyze
+            python3 waf-classic-cleanup.py --csv-file "$csv_file" --resource-type rules --analyze
             echo
             echo "Press Enter to continue..."
             read
@@ -965,7 +965,7 @@ import_rule_csv() {
             echo "WARNING: This will DELETE the marked Rules!"
             echo
             echo "=== Deleting Rules from CSV ==="
-            python3 wafv1-cleanup.py --csv-file "$csv_file" --resource-type rules
+            python3 waf-classic-cleanup.py --csv-file "$csv_file" --resource-type rules
             echo
             echo "Press Enter to continue..."
             read
@@ -1007,7 +1007,7 @@ import_condition_csv() {
         1)
             echo
             echo "=== Analyzing Conditions from CSV ==="
-            python3 wafv1-cleanup.py --csv-file "$csv_file" --resource-type conditions --analyze
+            python3 waf-classic-cleanup.py --csv-file "$csv_file" --resource-type conditions --analyze
             echo
             echo "Press Enter to continue..."
             read
@@ -1017,7 +1017,7 @@ import_condition_csv() {
             echo "WARNING: This will DELETE the marked Conditions!"
             echo
             echo "=== Deleting Conditions from CSV ==="
-            python3 wafv1-cleanup.py --csv-file "$csv_file" --resource-type conditions
+            python3 waf-classic-cleanup.py --csv-file "$csv_file" --resource-type conditions
             echo
             echo "Press Enter to continue..."
             read
@@ -1078,7 +1078,7 @@ delete_all_resources() {
     echo
     echo "=== DELETING ALL RESOURCES ==="
     echo
-    python3 wafv1-cleanup.py --delete-all $REGION_CMD
+    python3 waf-classic-cleanup.py --delete-all $REGION_CMD
     echo
     echo "Delete operation complete."
     echo "Press Enter to continue..."
