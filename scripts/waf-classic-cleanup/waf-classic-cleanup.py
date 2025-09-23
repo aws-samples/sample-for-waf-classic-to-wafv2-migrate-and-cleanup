@@ -28,7 +28,7 @@ sys.path.insert(0, common_path)
 
 from waf_region_config import WAFRegionManager
 from waf_utils import (
-    WAFClassicCleanupUtils,
+    WAFv1CleanupUtils,
     list_webacls_multi_region,
     list_rulegroups_multi_region, 
     search_webacls_multi_region,
@@ -84,7 +84,7 @@ def cleanup_webacls(webacl_ids=None, all_webacls=False, regions=None, all_region
     for webacl_id, region in webacls_to_process:
         print(f"\n--- Processing WebACL {webacl_id} in {region} ---")
         
-        cleanup = WAFClassicCleanupUtils(region)
+        cleanup = WAFv1CleanupUtils(region)
         analysis = cleanup.analyze_dependencies('webacl', webacl_id)
         
         print(f"Safe to delete: {analysis['safe_to_delete']}")
@@ -146,7 +146,7 @@ def cleanup_rulegroups(rulegroup_ids=None, all_rulegroups=False, regions=None, a
     for rulegroup_id, region in rulegroups_to_process:
         print(f"\n--- Processing RuleGroup {rulegroup_id} in {region} ---")
         
-        cleanup = WAFClassicCleanupUtils(region)
+        cleanup = WAFv1CleanupUtils(region)
         analysis = cleanup.analyze_dependencies('rulegroup', rulegroup_id)
         
         print(f"Safe to delete: {analysis['safe_to_delete']}")
@@ -208,7 +208,7 @@ def cleanup_rules(rule_ids=None, all_rules=False, regions=None, all_regions=Fals
     for rule_id, region in rules_to_process:
         print(f"\n--- Processing Rule {rule_id} in {region} ---")
         
-        cleanup = WAFClassicCleanupUtils(region)
+        cleanup = WAFv1CleanupUtils(region)
         analysis = cleanup.analyze_dependencies('rule', rule_id)
         
         print(f"Safe to delete: {analysis['safe_to_delete']}")
@@ -272,7 +272,7 @@ def cleanup_conditions(condition_ids=None, all_conditions=False, regions=None, a
     for condition_id, condition_type, region in conditions_to_process:
         print(f"\n--- Processing {condition_type} {condition_id} in {region} ---")
         
-        cleanup = WAFClassicCleanupUtils(region)
+        cleanup = WAFv1CleanupUtils(region)
         analysis = cleanup.analyze_dependencies(condition_type, condition_id)
         
         print(f"Safe to delete: {analysis['safe_to_delete']}")
@@ -348,13 +348,13 @@ def cleanup_from_csv(csv_files, resource_type, analyze_only=False):
                         resource_id, region, condition_type = resource_info
                         print(f"\n--- Processing {condition_type} {resource_id} in {region} ---")
                         
-                        cleanup = WAFClassicCleanupUtils(region)
+                        cleanup = WAFv1CleanupUtils(region)
                         analysis = cleanup.analyze_dependencies(condition_type, resource_id)
                     else:
                         resource_id, region = resource_info
                         print(f"\n--- Processing {resource_type_singular} {resource_id} in {region} ---")
                         
-                        cleanup = WAFClassicCleanupUtils(region)
+                        cleanup = WAFv1CleanupUtils(region)
                         analysis = cleanup.analyze_dependencies(resource_type_singular, resource_id)
                     
                     print(f"Safe to delete: {analysis['safe_to_delete']}")
@@ -689,7 +689,7 @@ def delete_all_resources(regions=None, all_regions=False):
     for region in target_regions:
         print(f"\n--- Processing region {region} ---")
         
-        cleanup = WAFClassicCleanupUtils(region)
+        cleanup = WAFv1CleanupUtils(region)
         
         # Delete in proper order: WebACLs -> RuleGroups -> Rules -> Conditions
         # This ensures dependencies are removed first
@@ -782,7 +782,7 @@ def export_webacls_for_cleanup(webacl_ids=None, all_webacls=False, regions=None,
     flat_webacls = []
     for region, webacls in webacls_data.items():
         # Create cleanup utils for this region to get association information
-        cleanup = WAFClassicCleanupUtils(region)
+        cleanup = WAFv1CleanupUtils(region)
         
         for webacl in webacls:
             webacl['region'] = region
@@ -814,7 +814,7 @@ def export_rulegroups_for_cleanup(rulegroup_ids=None, all_rulegroups=False, regi
     flat_rulegroups = []
     for region, rulegroups in rulegroups_data.items():
         # Create cleanup utils for this region to get usage information
-        cleanup = WAFClassicCleanupUtils(region)
+        cleanup = WAFv1CleanupUtils(region)
         
         for rulegroup in rulegroups:
             rulegroup['region'] = region
@@ -847,7 +847,7 @@ def export_rules_for_cleanup(rule_ids=None, all_rules=False, regions=None, all_r
     flat_rules = []
     for region, rules in rules_data.items():
         # Create cleanup utils for this region to get usage information
-        cleanup = WAFClassicCleanupUtils(region)
+        cleanup = WAFv1CleanupUtils(region)
         
         for rule in rules:
             rule['region'] = region
