@@ -68,6 +68,8 @@ WAF Classic is supported in the following 32 AWS regions, plus a special "cloudf
 
 ### Basic Usage
 
+[Go to the CSV workflow section](#csv-exportimport-workflow)
+
 ```bash
 # Interactive shell wrapper (recommended)
 ./waf-classic-cleanup.sh
