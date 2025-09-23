@@ -19,26 +19,26 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(
 
 # Import the modules to test - handle hyphenated filename
 import importlib.util
-wafv1_cleanup_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'waf-cleanup', 'wafv1-cleanup.py')
-spec = importlib.util.spec_from_file_location("wafv1_cleanup", wafv1_cleanup_path)
-wafv1_cleanup = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(wafv1_cleanup)
+waf_classic_cleanup_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'waf-cleanup', 'waf_classic-cleanup.py')
+spec = importlib.util.spec_from_file_location("waf_classic_cleanup", waf_classic_cleanup_path)
+waf_classic_cleanup = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(waf_classic_cleanup)
 
 # Import the functions from the module
-cleanup_webacls = wafv1_cleanup.cleanup_webacls
-cleanup_rulegroups = wafv1_cleanup.cleanup_rulegroups
-cleanup_from_csv = wafv1_cleanup.cleanup_from_csv
-delete_resource_safe = wafv1_cleanup.delete_resource_safe
-delete_resources_by_type = wafv1_cleanup.delete_resources_by_type
-delete_all_resources = wafv1_cleanup.delete_all_resources
+cleanup_webacls = waf_classic_cleanup.cleanup_webacls
+cleanup_rulegroups = waf_classic_cleanup.cleanup_rulegroups
+cleanup_from_csv = waf_classic_cleanup.cleanup_from_csv
+delete_resource_safe = waf_classic_cleanup.delete_resource_safe
+delete_resources_by_type = waf_classic_cleanup.delete_resources_by_type
+delete_all_resources = waf_classic_cleanup.delete_all_resources
 
 
 class TestCleanupWebACLs(unittest.TestCase):
     """Test cases for WebACL cleanup functionality"""
     
-    @patch.object(wafv1_cleanup, 'WAFv1CleanupUtils')
-    @patch.object(wafv1_cleanup, 'list_webacls_multi_region')
-    @patch.object(wafv1_cleanup, 'delete_resource_safe')
+    @patch.object(waf_classic_cleanup, 'waf_classicCleanupUtils')
+    @patch.object(waf_classic_cleanup, 'list_webacls_multi_region')
+    @patch.object(waf_classic_cleanup, 'delete_resource_safe')
     def test_cleanup_all_webacls(self, mock_delete, mock_list, mock_cleanup_utils):
         """Test cleaning up all WebACLs in regions"""
         # Mock WebACL list
@@ -68,9 +68,9 @@ class TestCleanupWebACLs(unittest.TestCase):
         self.assertEqual(mock_cleanup_instance.analyze_dependencies.call_count, 2)
         mock_delete.assert_called_once_with('webacl', 'acl-123', 'us-east-1')
     
-    @patch.object(wafv1_cleanup, 'WAFv1CleanupUtils')
-    @patch.object(wafv1_cleanup, 'search_webacls_multi_region')
-    @patch.object(wafv1_cleanup, 'delete_resource_safe')
+    @patch.object(waf_classic_cleanup, 'waf_classicCleanupUtils')
+    @patch.object(waf_classic_cleanup, 'search_webacls_multi_region')
+    @patch.object(waf_classic_cleanup, 'delete_resource_safe')
     def test_cleanup_specific_webacls(self, mock_delete, mock_search, mock_cleanup_utils):
         """Test cleaning up specific WebACLs"""
         # Mock WebACL search
@@ -100,8 +100,8 @@ class TestCleanupWebACLs(unittest.TestCase):
         mock_cleanup_instance.analyze_dependencies.assert_called_once_with('webacl', 'acl-123')
         mock_delete.assert_called_once_with('webacl', 'acl-123', 'us-east-1')
     
-    @patch.object(wafv1_cleanup, 'WAFv1CleanupUtils')
-    @patch.object(wafv1_cleanup, 'search_webacls_multi_region')
+    @patch.object(waf_classic_cleanup, 'waf_classicCleanupUtils')
+    @patch.object(waf_classic_cleanup, 'search_webacls_multi_region')
     def test_cleanup_analyze_only(self, mock_search, mock_cleanup_utils):
         """Test analyze-only mode"""
         # Mock WebACL search
@@ -126,9 +126,9 @@ class TestCleanupWebACLs(unittest.TestCase):
         # Verify analysis was done but no deletion
         mock_cleanup_instance.analyze_dependencies.assert_called_once_with('webacl', 'acl-123')
     
-    @patch.object(wafv1_cleanup, 'WAFRegionManager')
-    @patch.object(wafv1_cleanup, 'WAFv1CleanupUtils')
-    @patch.object(wafv1_cleanup, 'list_webacls_multi_region')
+    @patch.object(waf_classic_cleanup, 'WAFRegionManager')
+    @patch.object(waf_classic_cleanup, 'waf_classicCleanupUtils')
+    @patch.object(waf_classic_cleanup, 'list_webacls_multi_region')
     def test_cleanup_all_regions(self, mock_list, mock_cleanup_utils, mock_region_manager):
         """Test cleanup with all regions"""
         # Mock region list
@@ -161,9 +161,9 @@ class TestCleanupWebACLs(unittest.TestCase):
 class TestCleanupRuleGroups(unittest.TestCase):
     """Test cases for RuleGroup cleanup functionality"""
     
-    @patch.object(wafv1_cleanup, 'WAFv1CleanupUtils')
-    @patch.object(wafv1_cleanup, 'list_rulegroups_multi_region')
-    @patch.object(wafv1_cleanup, 'delete_resource_safe')
+    @patch.object(waf_classic_cleanup, 'waf_classicCleanupUtils')
+    @patch.object(waf_classic_cleanup, 'list_rulegroups_multi_region')
+    @patch.object(waf_classic_cleanup, 'delete_resource_safe')
     def test_cleanup_all_rulegroups(self, mock_delete, mock_list, mock_cleanup_utils):
         """Test cleaning up all RuleGroups"""
         # Mock RuleGroup list
@@ -196,8 +196,8 @@ class TestCleanupRuleGroups(unittest.TestCase):
         self.assertEqual(mock_cleanup_instance.analyze_dependencies.call_count, 2)
         self.assertEqual(mock_delete.call_count, 2)
     
-    @patch.object(wafv1_cleanup, 'WAFv1CleanupUtils')
-    @patch.object(wafv1_cleanup, 'search_rulegroups_multi_region')
+    @patch.object(waf_classic_cleanup, 'waf_classicCleanupUtils')
+    @patch.object(waf_classic_cleanup, 'search_rulegroups_multi_region')
     def test_cleanup_specific_rulegroups_with_dependencies(self, mock_search, mock_cleanup_utils):
         """Test cleaning up RuleGroups with dependencies"""
         # Mock RuleGroup search
@@ -226,8 +226,8 @@ class TestCleanupRuleGroups(unittest.TestCase):
 class TestCleanupFromCSV(unittest.TestCase):
     """Test cases for CSV-based cleanup"""
     
-    @patch.object(wafv1_cleanup, 'WAFv1CleanupUtils')
-    @patch.object(wafv1_cleanup, 'delete_resource_safe')
+    @patch.object(waf_classic_cleanup, 'waf_classicCleanupUtils')
+    @patch.object(waf_classic_cleanup, 'delete_resource_safe')
     @patch('csv.DictReader')
     @patch('builtins.open', create=True)
     def test_cleanup_webacls_from_csv(self, mock_open, mock_csv_reader, mock_delete, mock_cleanup_utils):
@@ -265,7 +265,7 @@ class TestCleanupFromCSV(unittest.TestCase):
         self.assertEqual(mock_cleanup_instance.analyze_dependencies.call_count, 2)
         self.assertEqual(mock_delete.call_count, 2)
     
-    @patch.object(wafv1_cleanup, 'WAFv1CleanupUtils')
+    @patch.object(waf_classic_cleanup, 'waf_classicCleanupUtils')
     @patch('builtins.open', create=True)
     def test_cleanup_from_csv_with_errors(self, mock_open, mock_cleanup_utils):
         """Test CSV cleanup with file errors"""
@@ -449,7 +449,7 @@ class TestDeleteResourceSafe(unittest.TestCase):
 class TestDeleteResourcesByType(unittest.TestCase):
     """Test cases for batch resource deletion"""
     
-    @patch.object(wafv1_cleanup, 'delete_resource_safe')
+    @patch.object(waf_classic_cleanup, 'delete_resource_safe')
     @patch('time.sleep')
     def test_delete_resources_by_type(self, mock_sleep, mock_delete):
         """Test batch deletion of resources"""
@@ -474,7 +474,7 @@ class TestDeleteResourcesByType(unittest.TestCase):
         self.assertEqual(mock_delete.call_count, 3)
         self.assertEqual(mock_sleep.call_count, 3)
     
-    @patch.object(wafv1_cleanup, 'delete_resource_safe')
+    @patch.object(waf_classic_cleanup, 'delete_resource_safe')
     def test_delete_empty_resource_list(self, mock_delete):
         """Test deletion with empty resource list"""
         # Execute with empty list
@@ -487,8 +487,8 @@ class TestDeleteResourcesByType(unittest.TestCase):
 class TestDeleteAllResources(unittest.TestCase):
     """Test cases for deleting all resources"""
     
-    @patch.object(wafv1_cleanup, 'WAFv1CleanupUtils')
-    @patch.object(wafv1_cleanup, 'delete_resources_by_type')
+    @patch.object(waf_classic_cleanup, 'waf_classicCleanupUtils')
+    @patch.object(waf_classic_cleanup, 'delete_resources_by_type')
     @patch('builtins.input')
     def test_delete_all_resources_confirmed(self, mock_input, mock_delete_batch, mock_cleanup_utils):
         """Test delete all with user confirmation"""
@@ -532,9 +532,9 @@ class TestDeleteAllResources(unittest.TestCase):
         # Verify prompt was shown
         mock_input.assert_called_once()
     
-    @patch.object(wafv1_cleanup, 'WAFRegionManager')
-    @patch.object(wafv1_cleanup, 'WAFv1CleanupUtils')
-    @patch.object(wafv1_cleanup, 'delete_resources_by_type')
+    @patch.object(waf_classic_cleanup, 'WAFRegionManager')
+    @patch.object(waf_classic_cleanup, 'waf_classicCleanupUtils')
+    @patch.object(waf_classic_cleanup, 'delete_resources_by_type')
     @patch('builtins.input')
     def test_delete_all_resources_multiple_regions(self, mock_input, mock_delete_batch, 
                                                    mock_cleanup_utils, mock_region_manager):
@@ -563,8 +563,8 @@ class TestDeleteAllResources(unittest.TestCase):
 class TestIntegrationScenarios(unittest.TestCase):
     """Integration test scenarios"""
     
-    @patch.object(wafv1_cleanup, 'WAFv1CleanupUtils')
-    @patch.object(wafv1_cleanup, 'search_webacls_multi_region')
+    @patch.object(waf_classic_cleanup, 'waf_classicCleanupUtils')
+    @patch.object(waf_classic_cleanup, 'search_webacls_multi_region')
     @patch('boto3.client')
     def test_cleanup_webacl_with_all_dependencies(self, mock_boto3_client, mock_search, mock_cleanup_utils):
         """Test cleanup of WebACL with all types of dependencies"""
@@ -595,9 +595,9 @@ class TestIntegrationScenarios(unittest.TestCase):
         # Verify analysis was done but no deletion due to dependencies
         mock_cleanup_instance.analyze_dependencies.assert_called_once()
     
-    @patch.object(wafv1_cleanup, 'WAFv1CleanupUtils')
-    @patch.object(wafv1_cleanup, 'list_webacls_multi_region')
-    @patch.object(wafv1_cleanup, 'delete_resource_safe')
+    @patch.object(waf_classic_cleanup, 'waf_classicCleanupUtils')
+    @patch.object(waf_classic_cleanup, 'list_webacls_multi_region')
+    @patch.object(waf_classic_cleanup, 'delete_resource_safe')
     @patch('time.sleep')
     def test_cleanup_performance_with_many_resources(self, mock_sleep, mock_delete, 
                                                     mock_list, mock_cleanup_utils):
