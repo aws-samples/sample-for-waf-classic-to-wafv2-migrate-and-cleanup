@@ -7,14 +7,14 @@ This repository contains tools for managing AWS WAF Classic (v1) resources, incl
 ### WAF Migration Tool (`scripts/waf-migration/`)
 Tools for migrating AWS WAF Classic resources to WAF v2.
 
-- **waf-migrator.py** - Core migration engine
-- **waf-migrate.sh** - Interactive shell interface
+- **waf-classic-migrator.py** - Core migration engine
+- **waf-classic-migrate.sh** - Interactive shell interface
 
 ### WAF Cleanup Tool (`scripts/waf-cleanup/`)
 Tools for cleaning up AWS WAF Classic resources.
 
-- **wafv1-cleanup.py** - Core cleanup engine
-- **wafv1-cleanup.sh** - Interactive shell interface
+- **waf-classic-cleanup.py** - Core cleanup engine
+- **waf-classic-cleanup.sh** - Interactive shell interface
 
 ### Common Utilities (`scripts/common/`)
 Shared utilities and configurations used by both tools.
@@ -41,14 +41,14 @@ Covers comprehensive tests for both migation and cleanup.
 
 ### Migration Tool
 ```bash
-cd scripts/waf-migration
-./waf-migrate.sh
+cd scripts/waf-classic-migration
+./waf-classic-migrate.sh
 ```
 
 ### Cleanup Tool
 ```bash
-cd scripts/waf-cleanup
-./wafv1-cleanup.sh
+cd scripts/waf-classic-cleanup
+./waf-classic-cleanup.sh
 ```
 
 ## AWS Permissions Required
@@ -59,10 +59,6 @@ The tools require the following AWS permissions:
 - CloudFront read permissions (for global resources)
 - Application Load Balancer read permissions (for regional resources)
 
-## License
-
-Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-SPDX-License-Identifier: MIT-0
 
 ## Support
 
@@ -70,4 +66,7 @@ This is sample code provided for migrating and cleanup WAFv1 Classic. For produc
 
 ---
 
-**Last Updated**: September 17, 2025
+## License
+
+Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+SPDX-License-Identifier: MIT-0
