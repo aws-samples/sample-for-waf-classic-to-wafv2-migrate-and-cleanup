@@ -1,0 +1,10 @@
+webacl_name,webacl_id,region,scope,account_id,default_action,rules_count,associated_resources_NOT_MIGRATED,resource_identifiers,mark_for_migration
+test-Deploy_v1,0b703814-3679-4324-80e6-112c31e85aad,us-east-1,regional,746533260405,BLOCK,1,ALB: uthiraTest3 (uthiraTest3-915056910.us-east-1.elb.amazonaws.com),arn:aws:elasticloadbalancing:us-east-1:746533260405:loadbalancer/app/uthiraTest3/510a9113bbfea18d,MIGRATE
+test_classic,1e08d944-8693-4bcf-8e86-9230ac1d912f,us-east-1,regional,746533260405,BLOCK,1,None,None,MIGRATE
+withoutRBR,334e7f60-e8d6-44e3-b26c-2fa8e2bf8e40,us-east-1,regional,746533260405,BLOCK,1,None,None,MIGRATE
+testapigwdelete,3c150566-9d65-431b-88bd-d67cb6bfdb30,us-east-1,regional,746533260405,ALLOW,1,None,None,MIGRATE
+good-classic-webacl,53820a3e-a0e8-46ff-8f81-70be348c691f,us-east-1,regional,746533260405,BLOCK,1,ALB: Good-classic (Good-classic-332164949.us-east-1.elb.amazonaws.com),arn:aws:elasticloadbalancing:us-east-1:746533260405:loadbalancer/app/Good-classic/050e12978ea5eb95,MIGRATE
+cw-test-shield,59b3bcf6-3cdf-4738-8b4c-c4635739f4e7,us-east-1,regional,746533260405,BLOCK,1,ALB: cw-shield (cw-shield-1547354705.us-east-1.elb.amazonaws.com),arn:aws:elasticloadbalancing:us-east-1:746533260405:loadbalancer/app/cw-shield/f0d8b7c5be886e43,MIGRATE
+fin-clas-test,77e61660-8990-486e-a3e3-012d2067e254,us-east-1,regional,746533260405,BLOCK,1,None,None,MIGRATE
+Test_shield_v1,93312e9e-e34c-48d7-8fa7-62258e83524b,us-east-1,regional,746533260405,ALLOW,1,ALB: ClassicSriTest (ClassicSriTest-1772615003.us-east-1.elb.amazonaws.com),arn:aws:elasticloadbalancing:us-east-1:746533260405:loadbalancer/app/ClassicSriTest/4add0855802362de,MIGRATE
+Cl-test-123,f8727280-9331-40a8-910e-473b9494ecca,us-east-1,regional,746533260405,BLOCK,1,ALB: Classic2Sri (Classic2Sri-229091904.us-east-1.elb.amazonaws.com),arn:aws:elasticloadbalancing:us-east-1:746533260405:loadbalancer/app/Classic2Sri/fdd6a1db67369261,MIGRATE

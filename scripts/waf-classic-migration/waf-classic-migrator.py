@@ -4973,8 +4973,8 @@ def process_webacl_csv_analysis(csv_file, migrator):
                 webacl_id = row['webacl_id']
                 region = row['region']
                 marked = row['mark_for_migration'] 
-                print(f"--- Analyzing WebACL {webacl_id} in {region} ---")
                 if marked != 'MIGRATE':
+                    print(f"--- Analyzing WebACL {webacl_id} in {region} ---")
                     print("SKIPPING: WebACL not marked for migration")
                     print()
                     continue
