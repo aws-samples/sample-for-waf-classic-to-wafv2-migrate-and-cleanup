@@ -35,7 +35,7 @@ def export_webacls_to_csv(webacls_data, filename=None, mark_column='mark_for_del
     
     headers = [
         'webacl_name', 'webacl_id', 'region', 'scope', 'account_id', 
-        'default_action', 'rules_count', 'associated_resources', 
+        'default_action', 'rules_count', 'associated_resources_NOT_MIGRATED', 
         'resource_identifiers', mark_column
     ]
     
@@ -73,13 +73,32 @@ def export_webacls_to_csv(webacls_data, filename=None, mark_column='mark_for_del
                 for assoc in webacl['associations']:
                     assoc_type = assoc.get('type', '')
                     
-                    if assoc_type == 'CloudFront':
+                    if assoc_type == 'CloudFront Distribution':
                         # CloudFront associations
                         resource_desc = "CloudFront: {}".format(assoc.get('domain', assoc.get('id', 'Unknown')))
                         assoc_list.append(resource_desc)
                         id_list.append(assoc.get('id', 'Unknown'))
+                    elif assoc_type == 'Application Load Balancer':
+                        # ALB associations
+                        name = assoc.get('name', 'Unknown')
+                        dns_name = assoc.get('dns_name', '')
+                        resource_desc = "ALB: {} ({})".format(name, dns_name) if dns_name else "ALB: {}".format(name)
+                        assoc_list.append(resource_desc)
+                        id_list.append(assoc.get('arn', assoc.get('name', 'Unknown')))
+                    elif assoc_type == 'API Gateway':
+                        # API Gateway associations
+                        name = assoc.get('name', 'Unknown')
+                        api_id = assoc.get('api_id', '')
+                        resource_desc = "API Gateway: {} ({})".format(name, api_id) if api_id else "API Gateway: {}".format(name)
+                        assoc_list.append(resource_desc)
+                        id_list.append(assoc.get('arn', assoc.get('api_id', 'Unknown')))
+                    elif assoc_type == 'CloudFront':
+                        # Legacy CloudFront format
+                        resource_desc = "CloudFront: {}".format(assoc.get('domain', assoc.get('id', 'Unknown')))
+                        assoc_list.append(resource_desc)
+                        id_list.append(assoc.get('id', 'Unknown'))
                     elif assoc_type == 'Regional':
-                        # Regional resources (ALB, API Gateway, etc.)
+                        # Legacy Regional resources format
                         arn = assoc.get('arn', '')
                         if arn:
                             # Extract resource type from ARN

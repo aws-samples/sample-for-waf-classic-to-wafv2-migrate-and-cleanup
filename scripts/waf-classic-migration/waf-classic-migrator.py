@@ -4829,6 +4829,27 @@ def migrate_webacls_in_region(migrator, region, webacl_ids, migrate_logging=Fals
             
             if result.get('success'):
                 print(f"SUCCESS: WebACL {webacl_id} migrated successfully")
+                
+                # Show association details during migration
+                try:
+                    detailed_analysis = get_detailed_migration_analysis(webacl_id, region)
+                    if detailed_analysis.get('associations'):
+                        print(f"    ASSOCIATIONS: {len(detailed_analysis['associations'])} active associations found")
+                        for assoc in detailed_analysis['associations'][:3]:  # Show first 3
+                            if assoc['type'] == 'Application Load Balancer':
+                                print(f"      • ALB: {assoc.get('name', 'Unknown')} ({assoc.get('dns_name', 'N/A')})")
+                            elif assoc['type'] == 'API Gateway':
+                                print(f"      • API Gateway: {assoc.get('name', 'Unknown')} (ID: {assoc.get('api_id', 'N/A')})")
+                            elif assoc['type'] == 'CloudFront Distribution':
+                                print(f"      • CloudFront: {assoc['id']} ({assoc['domain']})")
+                        if len(detailed_analysis['associations']) > 3:
+                            print(f"      ... and {len(detailed_analysis['associations']) - 3} more")
+                        print("    NOTE: Associations remain with Classic WebACL - manual update required")
+                    else:
+                        print("    ASSOCIATIONS: None")
+                except Exception:
+                    pass  # Don't fail migration if association check fails
+                
                 # Extract WebACL info from result
                 webacls = result.get('webacls', [])
                 if webacls and len(webacls) > 0:
@@ -5065,16 +5086,28 @@ def export_webacls_for_migration(webacl_ids=None, all_webacls=False, regions=Non
         print("No WebACLs found to export")
         return
     
-    # Convert to flat list for CSV export
+    # Convert to flat list for CSV export and add association data
     flat_webacls = []
     for region, webacls in webacls_data.items():
         for webacl in webacls:
             webacl['region'] = region
+            
+            # Get association details for each WebACL
+            try:
+                detailed_analysis = get_detailed_migration_analysis(webacl['id'], region)
+                if detailed_analysis.get('associations'):
+                    webacl['associations'] = detailed_analysis['associations']
+                else:
+                    webacl['associations'] = []
+            except Exception:
+                webacl['associations'] = []
+            
             flat_webacls.append(webacl)
     
     # Export to CSV with migration mark column
     csv_filename = export_webacls_to_csv(flat_webacls, filename, 'mark_for_migration')
     print(f"Exported {len(flat_webacls)} WebACLs to: {csv_filename}")
+    print("NOTE: Associated resources listed have NOT been migrated and require manual update")
 
 def export_rulegroups_for_migration(rulegroup_ids=None, all_rulegroups=False, regions=None, all_regions=False, filename=None):
     """Export RuleGroups to CSV for migration planning"""

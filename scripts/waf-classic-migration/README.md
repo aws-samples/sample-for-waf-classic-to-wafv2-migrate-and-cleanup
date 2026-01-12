@@ -213,7 +213,7 @@ AWS credentials configured with permissions:
 
 ### WebACL Export
 ```csv
-webacl_name,webacl_id,region,scope,account_id,default_action,rules_count,associated_resources,resource_identifiers,mark_for_migration
+webacl_name,webacl_id,region,scope,account_id,default_action,rules_count,associated_resources_NOT_MIGRATED,resource_identifiers,mark_for_migration
 MyWebACL,12345678-1234-1234-1234-123456789012,us-east-1,regional,123456789012,ALLOW,3,None,None,MIGRATE
 ```
 
