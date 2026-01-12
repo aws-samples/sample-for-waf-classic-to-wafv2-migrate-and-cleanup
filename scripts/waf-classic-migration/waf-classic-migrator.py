@@ -4696,8 +4696,6 @@ def analyze_webacls_in_region(migrator, region, webacl_ids):
     """Analyze specific WebACLs in a region with detailed association and migration readiness analysis"""
     for webacl_id in webacl_ids:
         try:
-            print(f"\n--- Analyzing WebACL {webacl_id} in {region} ---")
-            
             # Get detailed migration analysis
             detailed_analysis = get_detailed_migration_analysis(webacl_id, region)
             
@@ -4973,8 +4971,8 @@ def process_webacl_csv_analysis(csv_file, migrator):
                 webacl_id = row['webacl_id']
                 region = row['region']
                 marked = row['mark_for_migration'] 
+                print(f"--- Analyzing WebACL {webacl_id} in {region} ---")
                 if marked != 'MIGRATE':
-                    print(f"--- Analyzing WebACL {webacl_id} in {region} ---")
                     print("SKIPPING: WebACL not marked for migration")
                     print()
                     continue
