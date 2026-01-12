@@ -34,6 +34,176 @@ from csv_export_utils import (
 )
 from botocore.exceptions import NoCredentialsError, ClientError
 
+def get_detailed_migration_analysis(webacl_id: str, region: str) -> dict:
+    """Get detailed WebACL migration analysis including associations and migration readiness"""
+    try:
+        # Initialize clients
+        if region == 'cloudfront':
+            waf_classic = boto3.client('waf', region_name='us-east-1')
+            scope = 'global'
+        else:
+            waf_classic = boto3.client('waf-regional', region_name=region)
+            scope = 'regional'
+        
+        # Get WebACL details
+        webacl_response = waf_classic.get_web_acl(WebACLId=webacl_id)
+        webacl = webacl_response['WebACL']
+        
+        # Get associations (reuse logic from cleanup script)
+        associations = []
+        try:
+            if scope == 'global':
+                # CloudFront distributions
+                cf_client = boto3.client('cloudfront')
+                response = cf_client.list_distributions()
+                for dist in response.get('DistributionList', {}).get('Items', []):
+                    if dist.get('WebACLId') == webacl_id:
+                        associations.append({
+                            'type': 'CloudFront Distribution',
+                            'id': dist['Id'],
+                            'domain': dist['DomainName']
+                        })
+            else:
+                # Regional resources
+                response = waf_classic.list_resources_for_web_acl(WebACLId=webacl_id)
+                for resource_arn in response.get('ResourceArns', []):
+                    if 'loadbalancer' in resource_arn:
+                        try:
+                            elbv2_client = boto3.client('elbv2', region_name=region)
+                            lb_name = resource_arn.split('/')[-2]
+                            response = elbv2_client.describe_load_balancers(Names=[lb_name])
+                            lb = response['LoadBalancers'][0]
+                            associations.append({
+                                'type': 'Application Load Balancer',
+                                'name': lb['LoadBalancerName'],
+                                'arn': resource_arn,
+                                'dns_name': lb['DNSName'],
+                                'state': lb['State']['Code']
+                            })
+                        except ClientError:
+                            associations.append({
+                                'type': 'Application Load Balancer',
+                                'name': 'Unknown',
+                                'arn': resource_arn
+                            })
+                    elif 'apigateway' in resource_arn:
+                        try:
+                            api_id = resource_arn.split('/')[-2]
+                            apigw_client = boto3.client('apigateway', region_name=region)
+                            response = apigw_client.get_rest_api(restApiId=api_id)
+                            associations.append({
+                                'type': 'API Gateway',
+                                'name': response['name'],
+                                'arn': resource_arn,
+                                'api_id': api_id
+                            })
+                        except ClientError:
+                            associations.append({
+                                'type': 'API Gateway',
+                                'name': 'Unknown',
+                                'arn': resource_arn
+                            })
+                    else:
+                        associations.append({
+                            'type': 'Regional Resource',
+                            'arn': resource_arn
+                        })
+        except ClientError:
+            pass
+        
+        # Analyze rules and migration complexity
+        rules_analysis = []
+        migration_blockers = []
+        migration_warnings = []
+        
+        for rule_ref in webacl.get('Rules', []):
+            rule_id = rule_ref['RuleId']
+            rule_type = rule_ref.get('Type', 'REGULAR')
+            
+            rule_info = {
+                'rule_id': rule_id,
+                'priority': rule_ref['Priority'],
+                'action': rule_ref['Action']['Type'],
+                'type': rule_type,
+                'name': 'Unknown',
+                'migration_status': 'Ready',
+                'issues': []
+            }
+            
+            try:
+                if rule_type == 'REGULAR':
+                    rule_response = waf_classic.get_rule(RuleId=rule_id)
+                    rule = rule_response['Rule']
+                    rule_info['name'] = rule['Name']
+                    rule_info['predicates'] = len(rule.get('Predicates', []))
+                    
+                    # Check for complex predicates that might need attention
+                    for predicate in rule.get('Predicates', []):
+                        pred_type = predicate['Type']
+                        if pred_type in ['GeoMatchSet', 'SizeConstraintSet']:
+                            rule_info['issues'].append(f"Contains {pred_type} - verify migration mapping")
+                
+                elif rule_type == 'RATE_BASED':
+                    rule_response = waf_classic.get_rate_based_rule(RuleId=rule_id)
+                    rule = rule_response['Rule']
+                    rule_info['name'] = rule['Name']
+                    rule_info['predicates'] = len(rule.get('MatchPredicates', []))
+                    rule_info['rate_limit'] = rule.get('RateLimit', 0)
+                
+                elif rule_type == 'GROUP':
+                    try:
+                        rg_response = waf_classic.get_rule_group(RuleGroupId=rule_id)
+                        rule_group = rg_response['RuleGroup']
+                        rule_info['name'] = rule_group['Name']
+                        rule_info['predicates'] = 0
+                        
+                        # Check if it's a managed rule group
+                        if rule_group.get('MetricName', '').startswith('AWS'):
+                            rule_info['migration_status'] = 'Managed Rule Group'
+                            rule_info['issues'].append("AWS Managed Rule Group - check WAFv2 equivalent")
+                        
+                    except ClientError:
+                        rule_info['migration_status'] = 'Managed/Marketplace Rule'
+                        rule_info['issues'].append("Managed rule - may need manual replacement in WAFv2")
+                        migration_warnings.append(f"Rule {rule_id} appears to be managed - verify WAFv2 equivalent exists")
+            
+            except ClientError as e:
+                rule_info['migration_status'] = 'Error'
+                rule_info['issues'].append(f"Cannot access rule details: {str(e)}")
+                migration_blockers.append(f"Cannot analyze rule {rule_id}: {str(e)}")
+            
+            rules_analysis.append(rule_info)
+        
+        # Determine migration readiness
+        can_migrate = len(migration_blockers) == 0
+        has_associations = len(associations) > 0
+        
+        if has_associations:
+            migration_warnings.append("WebACL has active associations - migration will not affect existing associations")
+        
+        return {
+            'webacl_id': webacl_id,
+            'name': webacl['Name'],
+            'region': region,
+            'scope': scope,
+            'default_action': webacl['DefaultAction']['Type'],
+            'rules_count': len(rules_analysis),
+            'rules': rules_analysis,
+            'associations': associations,
+            'migration_ready': can_migrate,
+            'migration_blockers': migration_blockers,
+            'migration_warnings': migration_warnings,
+            'has_associations': has_associations
+        }
+        
+    except ClientError as e:
+        return {
+            'webacl_id': webacl_id,
+            'region': region,
+            'error': str(e),
+            'migration_ready': False
+        }
+
 def check_aws_credentials():
     """Check if AWS credentials are configured and working"""
     try:
@@ -4523,35 +4693,117 @@ def _enable_global_cumulative_reporting():
 
 # Helper functions for new command structure
 def analyze_webacls_in_region(migrator, region, webacl_ids):
-    """Analyze specific WebACLs in a region"""
+    """Analyze specific WebACLs in a region with detailed association and migration readiness analysis"""
     for webacl_id in webacl_ids:
         try:
+            print(f"\n--- Analyzing WebACL {webacl_id} in {region} ---")
+            
+            # Get detailed migration analysis
+            detailed_analysis = get_detailed_migration_analysis(webacl_id, region)
+            
+            if 'error' in detailed_analysis:
+                print(f"ERROR: {detailed_analysis['error']}")
+                continue
+            
+            # Enhanced analysis report with associations and detailed rules
+            print("=" * 60)
+            print(f"WebACL ANALYSIS: {detailed_analysis['name']}")
+            print("=" * 60)
+            print(f"Region: {region}")
+            print(f"Scope: {detailed_analysis['scope'].upper()}")
+            print(f"WebACL Name: {detailed_analysis['name']}")
+            print(f"WebACL ID: {webacl_id}")
+            print(f"Default Action: {detailed_analysis['default_action']}")
+            print(f"Total Rules: {detailed_analysis['rules_count']}")
+            print(f"Migration Ready: {'✓ YES' if detailed_analysis['migration_ready'] else '✗ NO'}")
+            
+            if detailed_analysis['migration_blockers']:
+                print("Migration Blockers:")
+                for blocker in detailed_analysis['migration_blockers']:
+                    print(f"  ✗ {blocker}")
+            
+            # Display detailed rules analysis
+            if detailed_analysis['rules']:
+                print(f"\nRULES ANALYSIS ({len(detailed_analysis['rules'])} rules):")
+                for rule in detailed_analysis['rules']:
+                    status_icon = "✓" if rule['migration_status'] == 'Ready' else "⚠" if 'Managed' in rule['migration_status'] else "✗"
+                    print(f"  {status_icon} {rule['name']} ({rule['type']})")
+                    print(f"    ID: {rule['rule_id']}, Priority: {rule['priority']}, Action: {rule['action']}")
+                    if 'rate_limit' in rule:
+                        print(f"    Rate Limit: {rule['rate_limit']} requests/5min")
+                    if 'predicates' in rule:
+                        print(f"    Conditions: {rule['predicates']}")
+                    print(f"    Migration Status: {rule['migration_status']}")
+                    if rule['issues']:
+                        for issue in rule['issues']:
+                            print(f"      ⚠ {issue}")
+            
+            # Display associations analysis
+            if detailed_analysis['associations']:
+                print(f"\nACTIVE ASSOCIATIONS ({len(detailed_analysis['associations'])}):")
+                for assoc in detailed_analysis['associations']:
+                    if assoc['type'] == 'Application Load Balancer':
+                        print(f"  • ALB: {assoc['name']}")
+                        print(f"    DNS: {assoc.get('dns_name', 'N/A')}")
+                        print(f"    State: {assoc.get('state', 'N/A')}")
+                        print(f"    ARN: {assoc['arn']}")
+                    elif assoc['type'] == 'API Gateway':
+                        print(f"  • API Gateway: {assoc['name']}")
+                        print(f"    API ID: {assoc.get('api_id', 'N/A')}")
+                        print(f"    ARN: {assoc['arn']}")
+                    elif assoc['type'] == 'CloudFront Distribution':
+                        print(f"  • CloudFront: {assoc['id']}")
+                        print(f"    Domain: {assoc['domain']}")
+                    else:
+                        print(f"  • {assoc}")
+                
+                print("\n  ℹ Note: Migration will create new WAFv2 WebACL but won't affect existing associations.")
+                print("    You'll need to manually update associations to use the new WAFv2 WebACL.")
+            else:
+                print("\nACTIVE ASSOCIATIONS: None")
+            
+            # WAF v1 to v2 mapping
+            print(f"\nWAF V1 TO V2 MAPPING")
+            print("-" * 40)
             analysis = migrator.analyze_and_plan(webacl_id)
-            migrator.print_migration_report(analysis)
+            print(f"Classic WebACL: {detailed_analysis['name']} (ID: {webacl_id})")
+            print(f"WAF v2 WebACL: Migrated_{detailed_analysis['name']}_{webacl_id}")
+            print("STATUS: SUCCESS: NEW - WebACL will be created during migration")
+            
+            # Show rule mappings
+            if detailed_analysis['rules']:
+                print("\nRule Mappings:")
+                for i, rule in enumerate(detailed_analysis['rules'], 1):
+                    action_text = rule['action']
+                    rate_info = f" [Rate: {rule['rate_limit']}/5min per IP]" if 'rate_limit' in rule else ""
+                    print(f"{action_text} RULE {i}: {rule['name']} -> {rule['name']} (Priority: {rule['priority']}){rate_info}")
+                    print(f"   Classic Rule ID: {rule['rule_id']}")
+                    print(f"   v2 Rule Name: Migrated_{rule['name']}_{rule['rule_id']}")
+                    if 'rate_limit' in rule:
+                        print(f"   v2 Statement: RateBasedStatement (Limit: {rule['rate_limit']}/5min per IP)")
+                    else:
+                        print(f"   v2 Statement: Rule with {rule.get('predicates', 0)} conditions")
             
             # Include logging analysis
             classic_webacl = migrator.waf_classic.get_web_acl(WebACLId=webacl_id)
             classic_arn = classic_webacl['WebACL']['WebACLArn']
             classic_logging = migrator.get_classic_logging_configuration(classic_arn)
             
-            print("\nLOGGING CONFIGURATION ANALYSIS")
+            print("\nLOGGING CONFIGURATION")
             print("-" * 40)
             if classic_logging:
                 destinations = classic_logging.get('LogDestinationConfigs', [])
                 redacted_fields = classic_logging.get('RedactedFields', [])
-                print(f"SUCCESS: Logging: ENABLED")
-                print(f"  Destinations: {len(destinations)}")
-                for i, dest in enumerate(destinations):
-                    print(f"    {i+1}. {dest}")
+                print(f"Status: ENABLED ({len(destinations)} destinations)")
                 if redacted_fields:
-                    print(f"  Redacted fields: {len(redacted_fields)}")
-                print("  → Available for migration to WAFv2")
+                    print(f"Redacted fields: {len(redacted_fields)}")
             else:
-                print("ERROR: Logging: NOT CONFIGURED")
-                print("  → No logging configuration to migrate")
+                print("Status: NOT CONFIGURED")
+                
         except Exception as e:
             print(f"ERROR: Failed to analyze WebACL {webacl_id}: {str(e)}")
-        print()
+        
+        print("=" * 60)
 
 def migrate_webacls_in_region(migrator, region, webacl_ids, migrate_logging=False):
     """Migrate specific WebACLs in a region"""
@@ -5053,10 +5305,7 @@ def handle_migrate_webacl(args):
                 region_migrator = WAFMigrator(region=region)
                 if args.analyze:
                     print("INFO: Analysis mode - no resources will be created")
-                    # Pass the webacls directly to avoid re-listing
-                    for webacl_id in webacl_ids:
-                        analysis = region_migrator.analyze_and_plan(webacl_id)
-                        region_migrator.print_migration_report(analysis)
+                    analyze_webacls_in_region(region_migrator, region, webacl_ids)
                 else:
                     print("INFO: Migration mode")
                     migrate_webacls_in_region(region_migrator, region, webacl_ids, args.migrate_logging)

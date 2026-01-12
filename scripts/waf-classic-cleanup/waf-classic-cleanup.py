@@ -45,6 +45,164 @@ from csv_export_utils import (
     export_conditions_to_csv
 )
 
+def get_detailed_webacl_info(webacl_id: str, region: str) -> Dict:
+    """Get detailed WebACL information including rules and associations"""
+    cleanup = WAFv1CleanupUtils(region)
+    
+    try:
+        # Get WebACL details
+        if region == 'cloudfront':
+            waf_client = boto3.client('waf', region_name='us-east-1')
+        else:
+            waf_client = boto3.client('waf-regional', region_name=region)
+        
+        webacl_response = waf_client.get_web_acl(WebACLId=webacl_id)
+        webacl = webacl_response['WebACL']
+        
+        # Get associations
+        associations = cleanup._get_webacl_associations(webacl_id)
+        
+        # Get detailed rule information
+        rules_info = []
+        for rule in webacl.get('Rules', []):
+            rule_info = {
+                'rule_id': rule['RuleId'],
+                'priority': rule['Priority'],
+                'action': rule['Action']['Type']
+            }
+            
+            # Try different rule types in order
+            rule_found = False
+            
+            # 1. Try regular rule
+            if not rule_found:
+                try:
+                    rule_response = waf_client.get_rule(RuleId=rule['RuleId'])
+                    rule_detail = rule_response['Rule']
+                    rule_info['name'] = rule_detail['Name']
+                    rule_info['predicates'] = len(rule_detail.get('Predicates', []))
+                    rule_info['type'] = 'Rule'
+                    rule_found = True
+                except ClientError:
+                    pass
+            
+            # 2. Try rate-based rule
+            if not rule_found:
+                try:
+                    rule_response = waf_client.get_rate_based_rule(RuleId=rule['RuleId'])
+                    rule_detail = rule_response['Rule']
+                    rule_info['name'] = rule_detail['Name']
+                    rule_info['predicates'] = len(rule_detail.get('MatchPredicates', []))
+                    rule_info['type'] = 'Rate-based Rule'
+                    rule_found = True
+                except ClientError:
+                    pass
+            
+            # 3. Try rule group
+            if not rule_found:
+                try:
+                    rule_response = waf_client.get_rule_group(RuleGroupId=rule['RuleId'])
+                    rule_detail = rule_response['RuleGroup']
+                    rule_info['name'] = rule_detail['Name']
+                    rule_info['predicates'] = 0  # Rule groups don't have predicates directly
+                    rule_info['type'] = 'Rule Group'
+                    rule_found = True
+                except ClientError:
+                    pass
+            
+            # 4. Check if it's a managed rule (AWS Marketplace or AWS managed)
+            if not rule_found:
+                # Managed rules often have specific ID patterns
+                if rule['RuleId'].startswith('AWS'):
+                    rule_info['name'] = f"AWS Managed Rule ({rule['RuleId']})"
+                    rule_info['predicates'] = 0
+                    rule_info['type'] = 'AWS Managed Rule'
+                    rule_found = True
+                elif len(rule['RuleId']) == 36 and rule['RuleId'].count('-') == 4:
+                    # Standard UUID format - likely a managed rule we can't access
+                    rule_info['name'] = f"Managed Rule ({rule['RuleId'][:8]}...)"
+                    rule_info['predicates'] = 0
+                    rule_info['type'] = 'Managed Rule'
+                    rule_found = True
+            
+            # 5. If still not found, mark as unknown
+            if not rule_found:
+                rule_info['name'] = f'Unknown Rule ({rule["RuleId"][:8]}...)'
+                rule_info['predicates'] = 0
+                rule_info['type'] = 'Unknown'
+            
+            rules_info.append(rule_info)
+        
+        # Enhanced association details
+        detailed_associations = []
+        for assoc in associations:
+            if assoc['type'] == 'Regional':
+                arn = assoc['arn']
+                if 'loadbalancer' in arn:
+                    # Get ALB details
+                    try:
+                        elbv2_client = boto3.client('elbv2', region_name=region)
+                        lb_name = arn.split('/')[-2]
+                        response = elbv2_client.describe_load_balancers(Names=[lb_name])
+                        lb = response['LoadBalancers'][0]
+                        detailed_associations.append({
+                            'type': 'Application Load Balancer',
+                            'name': lb['LoadBalancerName'],
+                            'arn': arn,
+                            'dns_name': lb['DNSName'],
+                            'state': lb['State']['Code']
+                        })
+                    except ClientError:
+                        detailed_associations.append({
+                            'type': 'Application Load Balancer',
+                            'name': 'Unknown',
+                            'arn': arn
+                        })
+                elif 'apigateway' in arn:
+                    # Get API Gateway details
+                    try:
+                        api_id = arn.split('/')[-2]
+                        apigw_client = boto3.client('apigateway', region_name=region)
+                        response = apigw_client.get_rest_api(restApiId=api_id)
+                        detailed_associations.append({
+                            'type': 'API Gateway',
+                            'name': response['name'],
+                            'arn': arn,
+                            'api_id': api_id
+                        })
+                    except ClientError:
+                        detailed_associations.append({
+                            'type': 'API Gateway',
+                            'name': 'Unknown',
+                            'arn': arn
+                        })
+                else:
+                    detailed_associations.append(assoc)
+            elif assoc['type'] == 'CloudFront':
+                detailed_associations.append({
+                    'type': 'CloudFront Distribution',
+                    'id': assoc['id'],
+                    'domain': assoc['domain']
+                })
+        
+        return {
+            'webacl_id': webacl_id,
+            'name': webacl['Name'],
+            'region': region,
+            'default_action': webacl['DefaultAction']['Type'],
+            'rules_count': len(rules_info),
+            'rules': rules_info,
+            'associations': detailed_associations,
+            'safe_to_delete': len(detailed_associations) == 0
+        }
+        
+    except ClientError as e:
+        return {
+            'webacl_id': webacl_id,
+            'region': region,
+            'error': str(e)
+        }
+
 def cleanup_webacls(webacl_ids=None, all_webacls=False, regions=None, all_regions=False, analyze_only=False):
     """Cleanup WebACLs with dependency analysis"""
     print("=== WebACL Cleanup ===")
@@ -84,28 +242,71 @@ def cleanup_webacls(webacl_ids=None, all_webacls=False, regions=None, all_region
     for webacl_id, region in webacls_to_process:
         print(f"\n--- Processing WebACL {webacl_id} in {region} ---")
         
-        cleanup = WAFv1CleanupUtils(region)
-        analysis = cleanup.analyze_dependencies('webacl', webacl_id)
-        
-        print(f"Safe to delete: {analysis['safe_to_delete']}")
-        if analysis['dependencies']:
-            print(f"Dependencies: {len(analysis['dependencies'])}")
-            for dep in analysis['dependencies']:
-                print(f"  - {dep}")
-        
-        if analysis['warnings']:
-            for warning in analysis['warnings']:
-                print(f"WARNING: {warning}")
-        
-        if not analyze_only:
+        if analyze_only:
+            # Use detailed analysis for analyze mode
+            detailed_info = get_detailed_webacl_info(webacl_id, region)
+            
+            if 'error' in detailed_info:
+                print(f"ERROR: {detailed_info['error']}")
+                continue
+            
+            print(f"WebACL Name: {detailed_info['name']}")
+            print(f"Default Action: {detailed_info['default_action']}")
+            print(f"Rules Count: {detailed_info['rules_count']}")
+            print(f"Safe to delete: {detailed_info['safe_to_delete']}")
+            
+            # Show detailed rules information
+            if detailed_info['rules']:
+                print("\nRules:")
+                for rule in detailed_info['rules']:
+                    print(f"  - {rule['name']} ({rule.get('type', 'Rule')})")
+                    print(f"    ID: {rule['rule_id']}, Priority: {rule['priority']}, Action: {rule['action']}")
+                    print(f"    Conditions: {rule['predicates']}")
+            
+            # Show detailed associations
+            if detailed_info['associations']:
+                print(f"\nActive Associations ({len(detailed_info['associations'])}):")
+                for assoc in detailed_info['associations']:
+                    if assoc['type'] == 'Application Load Balancer':
+                        print(f"  - ALB: {assoc['name']}")
+                        print(f"    DNS: {assoc.get('dns_name', 'N/A')}")
+                        print(f"    State: {assoc.get('state', 'N/A')}")
+                        print(f"    ARN: {assoc['arn']}")
+                    elif assoc['type'] == 'API Gateway':
+                        print(f"  - API Gateway: {assoc['name']}")
+                        print(f"    API ID: {assoc.get('api_id', 'N/A')}")
+                        print(f"    ARN: {assoc['arn']}")
+                    elif assoc['type'] == 'CloudFront Distribution':
+                        print(f"  - CloudFront: {assoc['id']}")
+                        print(f"    Domain: {assoc['domain']}")
+                    else:
+                        print(f"  - {assoc}")
+                print("\nWARNING: WebACL has active associations and cannot be safely deleted")
+            else:
+                print("\nNo active associations found - safe to delete")
+            
+            print("Analysis complete (no deletion performed)")
+        else:
+            # Use basic analysis for deletion mode
+            cleanup = WAFv1CleanupUtils(region)
+            analysis = cleanup.analyze_dependencies('webacl', webacl_id)
+            
+            print(f"Safe to delete: {analysis['safe_to_delete']}")
+            if analysis['dependencies']:
+                print(f"Dependencies: {len(analysis['dependencies'])}")
+                for dep in analysis['dependencies']:
+                    print(f"  - {dep}")
+            
+            if analysis['warnings']:
+                for warning in analysis['warnings']:
+                    print(f"WARNING: {warning}")
+            
             if analysis['safe_to_delete']:
                 print("Deleting WebACL...")
                 result = delete_resource_safe('webacl', webacl_id, region)
                 print(result)
             else:
                 print("SKIPPED: Skipping deletion due to dependencies")
-        else:
-            print("Analysis complete (no deletion performed)")
 
 def cleanup_rulegroups(rulegroup_ids=None, all_rulegroups=False, regions=None, all_regions=False, analyze_only=False):
     """Cleanup RuleGroups with dependency analysis"""
